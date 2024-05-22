@@ -34,10 +34,10 @@ const LinkCell = (cell) => {
   return <a href={cell.getValue()}>{cell.getValue()}</a>;
 };
 
-const ListCell = (cell) => {
+const ListCell = ({ cell }) => {
   return (
     <>
-      {cell.getValue().map((item) => (
+      {cell.map((item) => (
         <>
           <span>{item}</span>
           <br />
@@ -66,9 +66,14 @@ const columns = [
     header: "Type",
   },
   {
+    accessorFn: (row) => row["Requirement groups"].join("|||"),
     accessorKey: "Requirement groups",
     header: "Requirement groups",
-    cell: ListCell,
+    cell: ({ cell }) => {
+      console.log(cell.getValue());
+      console.log(cell.getValue().split("|||"));
+      return <ListCell cell={cell.getValue().split("|||")} />;
+    },
   },
 ];
 
