@@ -1,11 +1,9 @@
-import * as React from "react";
-import ReactDOM from "react-dom/client";
-
+import React from "react";
 import {
-  createColumnHelper,
+  useReactTable,
   flexRender,
   getCoreRowModel,
-  useReactTable,
+  getFilteredRowModel,
 } from "@tanstack/react-table";
 
 const defaultData = [
@@ -27,107 +25,136 @@ const defaultData = [
     Name: "Test data provider 3",
     Country: "France",
     Website: "https://yahoo.com",
-    Type: "Institutional",
+    Type: "Bla bla",
     "Requirement groups": ["Atmosphere"],
   },
 ];
 
-const columnHelper = createColumnHelper();
+const LinkCell = (cell) => {
+  return <a href={cell.getValue()}>{cell.getValue()}</a>;
+};
+
+const ListCell = (cell) => {
+  return (
+    <>
+      {cell.getValue().map((item) => (
+        <>
+          <span>{item}</span>
+          <br />
+        </>
+      ))}
+    </>
+  );
+};
 
 const columns = [
-  columnHelper.accessor("Name", {
-    cell: (info) => info.getValue(),
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("Country", {
-    cell: (info) => info.getValue(),
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("Website", {
-    cell: (info) => <a href={info.getValue()}>{info.getValue()}</a>,
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("Type", {
-    cell: (info) => info.getValue(),
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("Requirement groups", {
-    cell: (info) => (
-      <>
-        {info.getValue().map((item) => (
-          <>
-            <span>{item} ZZZZ</span>
-            <br />
-          </>
-        ))}
-      </>
-    ),
-    footer: (info) => info.column.id,
-  }),
+  {
+    accessorKey: "Name",
+    header: "Name",
+  },
+  {
+    accessorKey: "Country",
+    header: "Country",
+  },
+  {
+    accessorKey: "Website",
+    header: "Website",
+    cell: LinkCell,
+  },
+  {
+    accessorKey: "Type",
+    header: "Type",
+  },
+  {
+    accessorKey: "Requirement groups",
+    header: "Requirement groups",
+    cell: ListCell,
+  },
 ];
 
-function App() {
-  const [data, _setData] = React.useState(() => [...defaultData]);
-  const rerender = React.useReducer(() => ({}), {})[1];
+// cell: (info) => <a href={info.getValue()}>{info.getValue()}</a>,
+// cell: (info) => (
+//   <>
+//     {info.getValue().map((item) => (
+//       <>
+//         <span>{item} ZZZZ</span>
+//         <br />
+//       </>
+//     ))}
+//   </>
+// ),
+const BasicTable = () => {
+  const finalData = defaultData;
+  const finalColumnDef = columns;
 
-  const table = useReactTable({
-    data,
-    columns,
+  const [filtering, setFiltering] = React.useState("");
+
+  const tableInstance = useReactTable({
+    columns: finalColumnDef,
+    data: finalData,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    state: {
+      globalFilter: filtering,
+    },
+    onGlobalFilterChanged: setFiltering,
   });
 
+  //   console.log("test", tableInstance.getHeaderGroups());
+
   return (
-    <div className="p-2">
+    <>
+      <input
+        type="text"
+        value={filtering}
+        onChange={(e) => setFiltering(e.target.value)}
+      />
+      <hr />
       <table>
         <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                </th>
-              ))}
-            </tr>
-          ))}
+          {tableInstance.getHeaderGroups().map((headerEl) => {
+            return (
+              <tr key={headerEl.id}>
+                {headerEl.headers.map((columnEl) => {
+                  return (
+                    <th key={columnEl.id} colSpan={columnEl.colSpan}>
+                      {columnEl.isPlaceholder
+                        ? null
+                        : flexRender(
+                            columnEl.column.columnDef.header,
+                            columnEl.getContext(),
+                          )}
+                    </th>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-        <tfoot>
-          {table.getFooterGroups().map((footerGroup) => (
-            <tr key={footerGroup.id}>
-              {footerGroup.headers.map((header) => (
-                <th key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.footer,
-                        header.getContext(),
+          {tableInstance.getRowModel().rows.map((rowEl) => {
+            return (
+              <tr key={rowEl.id}>
+                {rowEl.getVisibleCells().map((cellEl) => {
+                  return (
+                    <td key={cellEl.id}>
+                      {flexRender(
+                        cellEl.column.columnDef.cell,
+                        cellEl.getContext(),
                       )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </tfoot>
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
       </table>
-      <div className="h-4" />
-      <button onClick={() => rerender()} className="border p-2">
-        Rerender
-      </button>
-    </div>
+    </>
   );
+};
+
+function App() {
+  return <BasicTable />;
 }
 export default App;
