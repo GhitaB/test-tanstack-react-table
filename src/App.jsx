@@ -10,59 +10,58 @@ import {
 
 const defaultData = [
   {
-    firstName: "tanner",
-    lastName: "linsley",
-    age: 24,
-    visits: 100,
-    status: "In Relationship",
-    progress: 50,
+    Name: "Test data provider 1",
+    Country: "Romania",
+    Website: "https://google.com",
+    Type: "Institutional",
+    "Requirement groups": ["Atmosphere", "Cryosphere", "Hidrology"],
   },
   {
-    firstName: "tandy",
-    lastName: "miller",
-    age: 40,
-    visits: 40,
-    status: "Single",
-    progress: 80,
+    Name: "Test data provider 2",
+    Country: "Romania",
+    Website: "https://yahoo.com",
+    Type: "Institutional",
+    "Requirement groups": ["Atmosphere", "Cryosphere"],
   },
   {
-    firstName: "joe",
-    lastName: "dirte",
-    age: 45,
-    visits: 20,
-    status: "Complicated",
-    progress: 10,
+    Name: "Test data provider 3",
+    Country: "France",
+    Website: "https://yahoo.com",
+    Type: "Institutional",
+    "Requirement groups": ["Atmosphere"],
   },
 ];
 
 const columnHelper = createColumnHelper();
 
 const columns = [
-  columnHelper.accessor("firstName", {
+  columnHelper.accessor("Name", {
     cell: (info) => info.getValue(),
     footer: (info) => info.column.id,
   }),
-  columnHelper.accessor((row) => row.lastName, {
-    id: "lastName",
-    cell: (info) => <i>{info.getValue()}</i>,
-    header: () => <span>Last Name</span>,
+  columnHelper.accessor("Country", {
+    cell: (info) => info.getValue(),
     footer: (info) => info.column.id,
   }),
-  columnHelper.accessor("age", {
-    header: () => "Age",
-    cell: (info) => info.renderValue(),
+  columnHelper.accessor("Website", {
+    cell: (info) => <a href={info.getValue()}>{info.getValue()}</a>,
     footer: (info) => info.column.id,
   }),
-  columnHelper.accessor("visits", {
-    header: () => <span>Visits</span>,
+  columnHelper.accessor("Type", {
+    cell: (info) => info.getValue(),
     footer: (info) => info.column.id,
   }),
-  columnHelper.accessor("status", {
-    header: "Status",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("progress", {
-    header: "Profile Progress",
+  columnHelper.accessor("Requirement groups", {
+    cell: (info) => (
+      <>
+        {info.getValue().map((item) => (
+          <>
+            <span>{item} ZZZZ</span>
+            <br />
+          </>
+        ))}
+      </>
+    ),
     footer: (info) => info.column.id,
   }),
 ];
